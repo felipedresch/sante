@@ -27,7 +27,6 @@ class _ConsultaState extends State<Consulta> {
   TextEditingController _pagamentoController = TextEditingController();
   final _observacoesKey = GlobalKey<FormState>();
   TextEditingController _observacoesController = TextEditingController();
-
   final _pesoKey = GlobalKey<FormState>();
   TextEditingController _pesoController = TextEditingController();
   final _alturaKey = GlobalKey<FormState>();
@@ -53,8 +52,9 @@ class _ConsultaState extends State<Consulta> {
   late Sessao _consulta;
   bool fetching = true;
   bool edicao = false;
-  String title = " ";
+  String title = "";
   List<Sessao> consultaList = [];
+  List<Cliente> clienteList = [];
   
   int? index;
 
@@ -70,15 +70,28 @@ class _ConsultaState extends State<Consulta> {
 
   void getData() async {
     consultaList = await clienteRepository.recuperarConsultas();
+    clienteList = await clienteRepository.recuperarClientes();
     setState(() {
       fetching = false;
     });
   }
 
-  Future<String?> procuraNomeCliente (int id) async{
-    List resultado = await clienteRepository.db.rawQuery('SELECT nome FROM clientes WHERE id=?', [id]); //deve ta errado
+  String? procuraNomeCliente (int id){
+    String? nome;
+    for (var i = 0; i < clienteList.length; i++) {
+      if (clienteList[i].id == id) {
+        nome = clienteList[i].nome;
+        return nome;
+      }
+    }
+    return nome;
+    //Ta funcionando, mas é uma implementação bem porca. No futuro é melhor fazer com um rawquery
+    // para melhorar a performance.
+
+    //List resultado = await clienteRepository.db.rawQuery('SELECT nome FROM clientes WHERE id=' [id]); //deve ta errado
     //resultado.forEach((row) => print(row));
-    return resultado.first; //retorna uma row, por isso da erro
+    //return resultado.first; //retorna uma row, por isso da erro
+    //return resultado;
   }
 
   @override
@@ -129,10 +142,13 @@ class _ConsultaState extends State<Consulta> {
       getData();
       index = clienteRepository.indexConsulta;
       int idCliente = consultaList[index!].clienteID;
-      //Future<String?> a = procuraNomeCliente(idCliente);
-      //_clienteController.text = a.toString();
+      _clienteController.text = procuraNomeCliente(idCliente) ?? ""; //FUNCIONOOOOOOOOOOOU (mas mudar dps)
       _dataController.text = consultaList[index!].data;
-      _valorController.text = consultaList[index!].valor.toString();
+      if (consultaList[index!].valor == null) {
+        _valorController.text = "";
+      }else{
+        _valorController.text = consultaList[index!].valor.toString();
+      }
       _pagamentoController.text =
           consultaList.elementAt(index!).pagamento ?? "";
       _pesoController.text = consultaList[index!].peso ?? "";
@@ -180,7 +196,7 @@ class _ConsultaState extends State<Consulta> {
       if (!edicao) {
         Sessao consulta = Sessao(
             data: _dataController.text,
-            valor: double.tryParse(_valorController.text), //se for 0.xx da erro
+            valor: double.tryParse(_valorController.text),
             pagamento: _pagamentoController.text,
             peso: _pesoController.text,
             altura: _alturaController.text,
@@ -254,7 +270,6 @@ class _ConsultaState extends State<Consulta> {
             child: Column(
               children: <Widget>[
                 Padding(
-                  //form 1 - digita o nome do cliente e seleciona das opções
                   padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
                   child: Form(
                     key: _clienteKey,
@@ -269,7 +284,7 @@ class _ConsultaState extends State<Consulta> {
                         prefixIcon: Icon(Icons.person),
                       ),
                       keyboardType: TextInputType.name,
-                      readOnly: edicao ? true : false,
+                      readOnly: edicao ? false : true,
                       onTap: () {
                         if (!edicao) {
                           track.fromConsulta = true;
@@ -281,7 +296,7 @@ class _ConsultaState extends State<Consulta> {
                 ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
-                  //form 1: Data da Consulta
+                  //form Data da Consulta
                   child: Form(
                     key: _dataKey,
                     child: TextFormField(
@@ -371,7 +386,7 @@ class _ConsultaState extends State<Consulta> {
                     SizedBox(
                       width: MediaQuery.of(context).size.width * 0.5,
                       child: Padding(
-                        //form 6: Peso
+                        //form Peso
                         padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
                         child: Form(
                           key: _pesoKey,
@@ -401,7 +416,7 @@ class _ConsultaState extends State<Consulta> {
                     SizedBox(
                       width: MediaQuery.of(context).size.width * 0.5,
                       child: Padding(
-                        //form 7: Altura
+                        //form Altura
                         padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
                         child: Form(
                           key: _alturaKey,
@@ -435,7 +450,7 @@ class _ConsultaState extends State<Consulta> {
                     SizedBox(
                       width: MediaQuery.of(context).size.width * 0.5,
                       child: Padding(
-                        //form 8: Estomago
+                        //form Estomago
                         padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
                         child: Form(
                           key: _estomagoKey,
@@ -461,7 +476,7 @@ class _ConsultaState extends State<Consulta> {
                     SizedBox(
                       width: MediaQuery.of(context).size.width * 0.5,
                       child: Padding(
-                        //form 9: Cintura
+                        //form Cintura
                         padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
                         child: Form(
                           key: _cinturaKey,
@@ -491,7 +506,7 @@ class _ConsultaState extends State<Consulta> {
                     SizedBox(
                       width: MediaQuery.of(context).size.width * 0.5,
                       child: Padding(
-                        //form 10: Quadril
+                        //form Quadril
                         padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
                         child: Form(
                           key: _quadrilKey,
@@ -517,7 +532,7 @@ class _ConsultaState extends State<Consulta> {
                     SizedBox(
                       width: MediaQuery.of(context).size.width * 0.5,
                       child: Padding(
-                        //form 11: Umbigo
+                        //form Umbigo
                         padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
                         child: Form(
                           key: _umbigoKey,
@@ -543,7 +558,7 @@ class _ConsultaState extends State<Consulta> {
                   ],
                 ),
                 Padding(
-                  //form 16: Queixa Principal
+                  //form Queixa Principal
                   padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
                   child: Container(
                     height: 120,
@@ -577,7 +592,7 @@ class _ConsultaState extends State<Consulta> {
                   ),
                 ),
                 Padding(
-                  //form 17: Alimentacao
+                  //form Alimentacao
                   padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
                   child: Container(
                     height: 120,
@@ -604,7 +619,7 @@ class _ConsultaState extends State<Consulta> {
                   ),
                 ),
                 Padding(
-                  //form 18: Plano de Tratamento
+                  //form Plano de Tratamento
                   padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
                   child: Container(
                     height: 120,
@@ -631,7 +646,7 @@ class _ConsultaState extends State<Consulta> {
                   ),
                 ),
                 Padding(
-                  //form 19: Observações
+                  //form Observações
                   padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
                   child: Container(
                     height: 120,
