@@ -151,7 +151,6 @@ class _CadastroViewState extends State<CadastroView> {
                   //form 1: Nome
                   padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
                   child: Form(
-                    //key: _nomeKey,
                     child: TextFormField(
                       controller: _nomeController,
                       style: const TextStyle(fontSize: 16),
@@ -169,7 +168,6 @@ class _CadastroViewState extends State<CadastroView> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
                   child: Form(
-                    //key: _cpfKey,
                     child: TextFormField(
                       controller: _cpfController,
                       style: const TextStyle(fontSize: 16),
@@ -186,7 +184,7 @@ class _CadastroViewState extends State<CadastroView> {
                 ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
-                  //form 3: Telefone
+                  //form Telefone
                   child: Form(
                     child: TextFormField(
                       controller: _telefoneController,
@@ -205,7 +203,7 @@ class _CadastroViewState extends State<CadastroView> {
                 ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
-                  //form 4: E-mail
+                  //form E-mail
                   child: Form(
                     child: TextFormField(
                       controller: _emailController,
@@ -223,7 +221,7 @@ class _CadastroViewState extends State<CadastroView> {
                 ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
-                  //form 5: Data de Nascimento
+                  //form Data de Nascimento
                   child: Form(
                     child: TextFormField(
                       controller: _dataNascimentoController,
@@ -240,7 +238,7 @@ class _CadastroViewState extends State<CadastroView> {
                   ),
                 ),
                 Row(
-                  //Form Diabetes //CAMPO OBRIGATÓRIO
+                  //Form Diabetes
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
                     Padding(
@@ -286,7 +284,7 @@ class _CadastroViewState extends State<CadastroView> {
                       ),
                     ),
                     Padding(
-                      //Form Hipertensão //CAMPO OBRIGATÓRIO
+                      //Form Hipertensão
                       padding: const EdgeInsets.fromLTRB(0, 8, 10, 8),
                       child: Container(
                         padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
@@ -371,7 +369,7 @@ class _CadastroViewState extends State<CadastroView> {
                     ),
                   ],
                 ),
-                (_alergia == 1) //CAMPO OBRIGATÓRIO
+                (_alergia == 1)
                     ? Row(
                         //Form Alergia opção sim
                         children: <Widget>[
@@ -479,7 +477,7 @@ class _CadastroViewState extends State<CadastroView> {
                           ),
                         ],
                       ),
-                (_doenca == 1) //CAMPO OBRIGATÓRIO
+                (_doenca == 1)
                     ? Row(
                         //Form Doença Autoimune opção sim
                         children: <Widget>[
@@ -587,7 +585,7 @@ class _CadastroViewState extends State<CadastroView> {
                           ),
                         ],
                       ),
-                (_medicacao == 1) //CAMPO OBRIGATÓRIO
+                (_medicacao == 1)
                     ? Row(
                         //Form Medicação Contínua opção sim
                         children: <Widget>[

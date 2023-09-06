@@ -303,7 +303,7 @@ class _CadastroState extends State<Cadastro> {
             child: Column(
               children: <Widget>[
                 Padding(
-                  //form 1: Nome
+                  //form Nome
                   padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
                   child: Form(
                     key: _nomeKey,
@@ -332,7 +332,7 @@ class _CadastroState extends State<Cadastro> {
                 ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
-                  //form 2: CPF
+                  //form CPF
                   child: Form(
                     key: _cpfKey,
                     child: TextFormField(
@@ -364,7 +364,7 @@ class _CadastroState extends State<Cadastro> {
                 ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
-                  //form 3: Telefone
+                  //form Telefone
                   child: Form(
                     key: _telefoneKey,
                     child: TextFormField(
@@ -387,7 +387,7 @@ class _CadastroState extends State<Cadastro> {
                 ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
-                  //form 4: E-mail
+                  //form E-mail
                   child: Form(
                     key: _emailKey,
                     child: TextFormField(
@@ -413,7 +413,7 @@ class _CadastroState extends State<Cadastro> {
                 ),
                 Padding(
                   padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
-                  //form 5: Data de Nascimento
+                  //form Data de Nascimento
                   child: Form(
                     key: _dataNascimentoKey,
                     child: TextFormField(
@@ -441,7 +441,7 @@ class _CadastroState extends State<Cadastro> {
                   ),
                 ),
                 Row(
-                  //Form Diabetes //CAMPO OBRIGATÓRIO
+                  //Form Diabetes
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
                     Padding(
@@ -495,7 +495,7 @@ class _CadastroState extends State<Cadastro> {
                       ),
                     ),
                     Padding(
-                      //Form Hipertensão //CAMPO OBRIGATÓRIO
+                      //Form Hipertensão
                       padding: const EdgeInsets.fromLTRB(0, 8, 10, 8),
                       child: Container(
                         padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
@@ -596,7 +596,7 @@ class _CadastroState extends State<Cadastro> {
                     ),
                   ],
                 ),
-                (_alergia == 1) //CAMPO OBRIGATÓRIO
+                (_alergia == 1) 
                     ? Row(
                         //Form Alergia opção sim
                         children: <Widget>[
@@ -726,7 +726,7 @@ class _CadastroState extends State<Cadastro> {
                           ),
                         ],
                       ),
-                (_doenca == 1) //CAMPO OBRIGATÓRIO
+                (_doenca == 1)
                     ? Row(
                         //Form Doença Autoimune opção sim
                         children: <Widget>[
@@ -857,7 +857,7 @@ class _CadastroState extends State<Cadastro> {
                           ),
                         ],
                       ),
-                (_medicacao == 1) //CAMPO OBRIGATÓRIO
+                (_medicacao == 1)
                     ? Row(
                         //Form Medicação Contínua opção sim
                         children: <Widget>[
