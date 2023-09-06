@@ -11,7 +11,7 @@ class ContainerAll extends StatelessWidget {
         color: Color.fromRGBO(248, 240, 255, 1),
 
       ),
-      child: this.child,
+      child: child,
     );
   }
 }

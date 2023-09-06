@@ -16,35 +16,23 @@ class ConsultaView extends StatefulWidget {
 
 class _ConsultaViewState extends State<ConsultaView> {
   String title = "Visualização de Consulta";
-  TextEditingController _dataController = TextEditingController();
-  TextEditingController _valorController = TextEditingController();
-
-  TextEditingController _pagamentoController = TextEditingController();
-
-  TextEditingController _observacoesController = TextEditingController();
-
-  TextEditingController _pesoController = TextEditingController();
-
-  TextEditingController _alturaController = TextEditingController();
-
-  TextEditingController _estomagoController = TextEditingController();
-
-  TextEditingController _cinturaController = TextEditingController();
-
-  TextEditingController _quadrilController = TextEditingController();
-
-  TextEditingController _umbigoController = TextEditingController();
-
-  TextEditingController _queixaController = TextEditingController();
-
-  TextEditingController _alimentacaoController = TextEditingController();
-
-  TextEditingController _tratamentoController = TextEditingController();
+  final TextEditingController _dataController = TextEditingController();
+  final TextEditingController _valorController = TextEditingController();
+  final TextEditingController _pagamentoController = TextEditingController();
+  final TextEditingController _observacoesController = TextEditingController();
+  final TextEditingController _pesoController = TextEditingController();
+  final TextEditingController _alturaController = TextEditingController();
+  final TextEditingController _estomagoController = TextEditingController();
+  final TextEditingController _cinturaController = TextEditingController();
+  final TextEditingController _quadrilController = TextEditingController();
+  final TextEditingController _umbigoController = TextEditingController();
+  final TextEditingController _queixaController = TextEditingController();
+  final TextEditingController _alimentacaoController = TextEditingController();
+  final TextEditingController _tratamentoController = TextEditingController();
   int _exFisico = 0;
   int _hidratacao = 0;
 
   late ClienteRepository clienteRepository;
-  late Sessao _consulta;
   bool fetching = true;
   List<Sessao> consultaList = [];
   int? index;
