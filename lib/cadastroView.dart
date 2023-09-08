@@ -73,6 +73,22 @@ class _CadastroViewState extends State<CadastroView> {
     return consultasCliente;
   }
 
+  int alturaCards() {
+    int height;
+    if (consultasCliente.length == 1) {
+      height = 90;
+    } else if (consultasCliente.length == 2) {
+      height = 175;
+    } else if (consultasCliente.length == 3) {
+      height = 255;
+    } else if (consultasCliente.length == 4) {
+      height = 340;
+    } else {
+      height = 400;
+    }
+    return height;
+  }
+
   @override
   Widget build(BuildContext context) {
     TrackScreens track = Provider.of<TrackScreens>(context);
@@ -86,7 +102,6 @@ class _CadastroViewState extends State<CadastroView> {
 
     if (clienteRepository.indexCliente != null && !fetching) {
       //Recupera as infos do cadastro e preenche nos campos
-      getData();
       index = clienteRepository.indexCliente;
       _nomeController.text = clienteList[index!].nome;
       _cpfController.text = clienteList.elementAt(index).cpf;
@@ -103,7 +118,7 @@ class _CadastroViewState extends State<CadastroView> {
       _procEsteticoController.text =
           clienteList.elementAt(index).procEstetico ?? "";
       id = clienteList.elementAt(index).id;
-      //buscarConsultas(id!); //FAZ UMA LISTA INFINITAAAAAAAAAAAAAAAAAAAAAAA
+      buscarConsultas(id!);
 
       if (_alergiaController.text.isEmpty) {
         _alergia = 2;
@@ -126,7 +141,7 @@ class _CadastroViewState extends State<CadastroView> {
         _procEstetico = 1;
       }
     }
-  
+
     return WillPopScope(
       onWillPop: () async => false,
       child: Scaffold(
@@ -872,9 +887,9 @@ class _CadastroViewState extends State<CadastroView> {
                     ),
                   ],
                 ),
-                (buscarConsultas(id!).isNotEmpty)
+                (consultasCliente.isNotEmpty)
                     ? SizedBox(
-                        height: 400,
+                        height: alturaCards().toDouble(),
                         child: ListView.builder(
                             scrollDirection: Axis.vertical,
                             itemCount: consultasCliente.length,
@@ -894,7 +909,7 @@ class _CadastroViewState extends State<CadastroView> {
                                   //fromCadastroView = true
                                   clienteRepository.consultaSelected =
                                       consultasCliente
-                                          .first; //SERA???????? NAO SEI!!
+                                          .first;
                                   clienteRepository.indexConsulta = 0;
                                   track.consultasCliente = consultasCliente;
                                   Navigator.popAndPushNamed(
@@ -917,10 +932,9 @@ class _CadastroViewState extends State<CadastroView> {
                                   trailing:
                                       const Icon(Icons.visibility_outlined),
                                   onTap: () {
-                                    //fromCadastroView = true
                                     clienteRepository.consultaSelected =
                                         consultasCliente[
-                                            index]; //SERA???????? NAO SEI!!
+                                            index];
                                     clienteRepository.indexConsulta = index;
                                     track.consultasCliente = consultasCliente;
                                     Navigator.popAndPushNamed(
