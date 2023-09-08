@@ -557,7 +557,7 @@ class _ConsultaViewState extends State<ConsultaView> {
                     children: [
                       Container(
                         margin: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-                        child: const Icon(Icons.delete),
+                        child: const Icon(Icons.edit),
                       ),
                       const Text("Editar Consulta"),
                     ],

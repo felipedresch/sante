@@ -56,7 +56,6 @@ class _CadastroState extends State<Cadastro> {
     clienteRepository = ClienteRepository();
     clienteRepository.initDB().whenComplete(() async {
       getData();
-      setState(() {});
     });
   }
 
@@ -70,7 +69,6 @@ class _CadastroState extends State<Cadastro> {
   void editar() {
     if (clienteRepository.indexCliente != null) {
       edicao = true;
-      getData();
       index = clienteRepository.indexCliente;
       _nomeController.text = clienteList[index!].nome;
       _cpfController.text = clienteList.elementAt(index!).cpf;
@@ -208,9 +206,7 @@ class _CadastroState extends State<Cadastro> {
       String procEstetico = _procEsteticoController.text;
 
       if (!edicao) {
-        //List<Consulta> consultasCliente = [];
         Cliente clienteLocal = Cliente(
-            //consultas: consultasCliente,
             nome: nome,
             cpf: cpf,
             telefone: telefone,
@@ -228,18 +224,19 @@ class _CadastroState extends State<Cadastro> {
           clienteList.add(clienteLocal);
         });
       } else {
-        _cliente.nome = nome;
-        _cliente.cpf = cpf;
-        _cliente.telefone = telefone;
-        _cliente.email = email;
-        _cliente.dataNascimento = dataNascimento;
-        _cliente.sexo = sexo;
-        _cliente.diabetes = diabetes;
-        _cliente.hipertensao = hipertensao;
-        _cliente.alergia = alergia;
-        _cliente.doenca = doenca;
-        _cliente.medicacao = medicacao;
-        _cliente.procEstetico = procEstetico;
+        _cliente = Cliente(
+            nome: nome,
+            cpf: cpf,
+            telefone: telefone,
+            email: email,
+            dataNascimento: dataNascimento,
+            sexo: sexo,
+            diabetes: diabetes,
+            hipertensao: hipertensao,
+            alergia: alergia,
+            doenca: doenca,
+            medicacao: medicacao,
+            procEstetico: procEstetico);
         await updateCliente(_cliente);
       }
       resetData();
@@ -596,7 +593,7 @@ class _CadastroState extends State<Cadastro> {
                     ),
                   ],
                 ),
-                (_alergia == 1) 
+                (_alergia == 1)
                     ? Row(
                         //Form Alergia opção sim
                         children: <Widget>[
@@ -651,7 +648,8 @@ class _CadastroState extends State<Cadastro> {
                                           key: _alergiaKey,
                                           child: TextFormField(
                                             controller: _alergiaController,
-                                            style: const TextStyle(fontSize: 16),
+                                            style:
+                                                const TextStyle(fontSize: 16),
                                             decoration: const InputDecoration(
                                               border: UnderlineInputBorder(),
                                               labelText: "Especifique:",
@@ -781,7 +779,8 @@ class _CadastroState extends State<Cadastro> {
                                           key: _doencaKey,
                                           child: TextFormField(
                                             controller: _doencaController,
-                                            style: const TextStyle(fontSize: 16),
+                                            style:
+                                                const TextStyle(fontSize: 16),
                                             decoration: const InputDecoration(
                                               border: UnderlineInputBorder(),
                                               labelText: "Especifique:",
@@ -913,7 +912,8 @@ class _CadastroState extends State<Cadastro> {
                                           key: _medicacaoKey,
                                           child: TextFormField(
                                             controller: _medicacaoController,
-                                            style: const TextStyle(fontSize: 16),
+                                            style:
+                                                const TextStyle(fontSize: 16),
                                             decoration: const InputDecoration(
                                               border: UnderlineInputBorder(),
                                               labelText: "Especifique:",
@@ -1045,7 +1045,8 @@ class _CadastroState extends State<Cadastro> {
                                           key: _procEsteticoKey,
                                           child: TextFormField(
                                             controller: _procEsteticoController,
-                                            style: const TextStyle(fontSize: 16),
+                                            style:
+                                                const TextStyle(fontSize: 16),
                                             decoration: const InputDecoration(
                                               border: UnderlineInputBorder(),
                                               labelText: "Especifique:",
@@ -1126,7 +1127,8 @@ class _CadastroState extends State<Cadastro> {
                   margin: const EdgeInsets.fromLTRB(70, 0, 70, 10),
                   child: OutlinedButton(
                     style: const ButtonStyle(
-                        backgroundColor: MaterialStatePropertyAll(Colors.white)),
+                        backgroundColor:
+                            MaterialStatePropertyAll(Colors.white)),
                     onPressed: salvar,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,

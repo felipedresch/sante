@@ -55,7 +55,7 @@ class _ConsultaState extends State<Consulta> {
   String title = "";
   List<Sessao> consultaList = [];
   List<Cliente> clienteList = [];
-  
+
   int? index;
 
   @override
@@ -64,7 +64,6 @@ class _ConsultaState extends State<Consulta> {
     clienteRepository = ClienteRepository();
     clienteRepository.initDB().whenComplete(() async {
       getData();
-      setState(() {});
     });
   }
 
@@ -76,7 +75,7 @@ class _ConsultaState extends State<Consulta> {
     });
   }
 
-  String? procuraNomeCliente (int id){
+  String? procuraNomeCliente(int id) {
     String? nome;
     for (var i = 0; i < clienteList.length; i++) {
       if (clienteList[i].id == id) {
@@ -85,10 +84,10 @@ class _ConsultaState extends State<Consulta> {
       }
     }
     return nome;
-    //Ta funcionando, mas é uma implementação bem porca. No futuro é melhor fazer com um rawquery
-    // para melhorar a performance.
+    //Funcionando, mas é uma implementação bem ruim. No futuro é melhor fazer com um rawquery
+    // para melhorar a performance em situações em que a lista de clientes seja muuito extensa
 
-    //List resultado = await clienteRepository.db.rawQuery('SELECT nome FROM clientes WHERE id=' [id]); //deve ta errado
+    //List resultado = await clienteRepository.db.rawQuery('SELECT nome FROM clientes WHERE id=' [id]); //ta errado
     //resultado.forEach((row) => print(row));
     //return resultado.first; //retorna uma row, por isso da erro
     //return resultado;
@@ -134,19 +133,19 @@ class _ConsultaState extends State<Consulta> {
       _clienteController.text = track.cliente!.nome;
     }
 
-    if (clienteRepository.indexConsulta != null && !fetching){
+    if (clienteRepository.indexConsulta != null && !fetching) {
       edicao = true;
       setState(() {
         title = "Editar Consulta";
       });
-      getData();
       index = clienteRepository.indexConsulta;
       int idCliente = consultaList[index!].clienteID;
-      _clienteController.text = procuraNomeCliente(idCliente) ?? ""; //FUNCIONOOOOOOOOOOOU (mas mudar dps)
+      _clienteController.text =
+          procuraNomeCliente(idCliente) ?? ""; //FUNCIONOU (mas mudar dps)
       _dataController.text = consultaList[index!].data;
       if (consultaList[index!].valor == null) {
         _valorController.text = "";
-      }else{
+      } else {
         _valorController.text = consultaList[index!].valor.toString();
       }
       _pagamentoController.text =
@@ -216,23 +215,23 @@ class _ConsultaState extends State<Consulta> {
           consultaList.add(consulta);
         });
       } else {
-        _consulta.data = _dataController.text;
-        _consulta.valor = double.tryParse(_valorController.text);
-        _consulta.pagamento = _pagamentoController.text;
-        _consulta.peso = _pesoController.text;
-        _consulta.altura = _alturaController.text;
-        _consulta.estomago = _estomagoController.text;
-        _consulta.cintura = _cinturaController.text;
-        _consulta.quadril = _quadrilController.text;
-        _consulta.umbigo = _umbigoController.text;
-        _consulta.queixa = _queixaController.text;
-        _consulta.alimentacao = _alimentacaoController.text;
-        _consulta.tratamento = _tratamentoController.text;
-        _consulta.observacoes = _observacoesController.text;
-        _consulta.exFisico = _exFisico;
-        _consulta.hidratacao = _hidratacao;
-        _consulta.clienteID = track.cliente!.id!;
-
+        _consulta = Sessao(
+            data: _dataController.text,
+            valor: double.tryParse(_valorController.text),
+            pagamento: _pagamentoController.text,
+            peso: _pesoController.text,
+            altura: _alturaController.text,
+            estomago: _estomagoController.text,
+            cintura: _cinturaController.text,
+            quadril: _quadrilController.text,
+            umbigo: _umbigoController.text,
+            queixa: _queixaController.text,
+            alimentacao: _alimentacaoController.text,
+            tratamento: _tratamentoController.text,
+            observacoes: _observacoesController.text,
+            exFisico: _exFisico,
+            hidratacao: _hidratacao,
+            clienteID: consultaList[index!].clienteID);
         await updateConsultas(_consulta);
       }
       if (track.fromClienteList) {
