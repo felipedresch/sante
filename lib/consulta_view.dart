@@ -60,7 +60,6 @@ class _ConsultaViewState extends State<ConsultaView> {
 
     if (clienteRepository.indexConsulta != null) {
       consultaList = track.consultasCliente;
-      //getData();
       index = clienteRepository.indexConsulta;
       _dataController.text = consultaList[index!].data;
       _valorController.text = consultaList[index!].valor.toString();
@@ -105,7 +104,7 @@ class _ConsultaViewState extends State<ConsultaView> {
                 //form 1: Data da Consulta
                 child: Form(
                   child: TextFormField(
-                    readOnly: true, //aawaefefredededfedrtf
+                    readOnly: true,
                     controller: _dataController,
                     style: const TextStyle(fontSize: 16),
                     decoration: const InputDecoration(
