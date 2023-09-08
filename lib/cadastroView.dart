@@ -16,9 +16,7 @@ class CadastroView extends StatefulWidget {
 
 class _CadastroViewState extends State<CadastroView> {
   String title = "Visualização de Cadastro";
-
   final TextEditingController _nomeController = TextEditingController();
-
   final TextEditingController _cpfController = TextEditingController();
   final TextEditingController _telefoneController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
@@ -59,12 +57,12 @@ class _CadastroViewState extends State<CadastroView> {
     if (mounted) {
       setState(() {
         fetching = false;
-        buscarConsultas();
+        //buscarConsultas();
       });
     }
   }
 
-  buscarConsultas() {
+  List<Sessao> buscarConsultas(int id) {
     if (consultaList.isNotEmpty) {
       for (var i = 0; i < consultaList.length; i++) {
         if (consultaList.elementAt(i).clienteID == id) {
@@ -104,9 +102,8 @@ class _CadastroViewState extends State<CadastroView> {
       _medicacaoController.text = clienteList.elementAt(index).medicacao ?? "";
       _procEsteticoController.text =
           clienteList.elementAt(index).procEstetico ?? "";
-
       id = clienteList.elementAt(index).id;
-      //buscarConsultas(); //FAZ UMA LISTA INFINITAAAAAAAAAAAAAAAAAAAAAAA
+      //buscarConsultas(id!); //FAZ UMA LISTA INFINITAAAAAAAAAAAAAAAAAAAAAAA
 
       if (_alergiaController.text.isEmpty) {
         _alergia = 2;
@@ -129,7 +126,7 @@ class _CadastroViewState extends State<CadastroView> {
         _procEstetico = 1;
       }
     }
-
+  
     return WillPopScope(
       onWillPop: () async => false,
       child: Scaffold(
@@ -875,7 +872,7 @@ class _CadastroViewState extends State<CadastroView> {
                     ),
                   ],
                 ),
-                (consultasCliente.isNotEmpty)
+                (buscarConsultas(id!).isNotEmpty)
                     ? SizedBox(
                         height: 400,
                         child: ListView.builder(

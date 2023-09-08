@@ -102,7 +102,6 @@ class ClienteRepository extends ChangeNotifier {
   }
 
   Future<List<Sessao>> recuperarConsultas() async {
-    //nao testado
     final List<Map<String, Object?>> queryResult = await db.query('consultas');
     return queryResult.map((e) => Sessao.fromMap(e)).toList();
   }
