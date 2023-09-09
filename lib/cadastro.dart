@@ -1,4 +1,4 @@
-//TODO: Avisos de excluir cadastro
+//TODO: Avisos de excluir cadastro, implementar pesquisa por nome/cpf em clientelist
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -43,6 +43,7 @@ class _CadastroState extends State<Cadastro> {
   int _procEstetico = 0;
   final _procEsteticoKey = GlobalKey<FormState>();
   final TextEditingController _procEsteticoController = TextEditingController();
+  int? id;
   late ClienteRepository clienteRepository;
   late Cliente _cliente;
   bool edicao = false;
@@ -63,6 +64,7 @@ class _CadastroState extends State<Cadastro> {
     clienteList = await clienteRepository.recuperarClientes();
     setState(() {
       fetching = false;
+      editar();
     });
   }
 
@@ -84,7 +86,7 @@ class _CadastroState extends State<Cadastro> {
       _medicacaoController.text = clienteList.elementAt(index!).medicacao ?? "";
       _procEsteticoController.text =
           clienteList.elementAt(index!).procEstetico ?? "";
-
+      id = clienteList.elementAt(index!).id;
       setState(() {
         title = "Edição de Cadastro";
       });
@@ -112,139 +114,129 @@ class _CadastroState extends State<Cadastro> {
     }
   }
 
+  Future<int> addCliente(Cliente cliente) async {
+    return await clienteRepository.salvarClientes(cliente);
+  }
+
+  Future<int> updateCliente(Cliente cliente) async {
+    return await clienteRepository.atualizarClientes(cliente);
+  }
+
+  void resetData() {
+    _nomeController.clear();
+    _cpfController.clear();
+    _emailController.clear();
+    _telefoneController.clear();
+    _dataNascimentoController.clear();
+    _alergiaController.clear();
+    _doencaController.clear();
+    _medicacaoController.clear();
+    _procEsteticoController.clear();
+    edicao = false;
+  }
+
+  Future<void> salvar() async {
+    if (_nomeKey.currentState?.validate() == false ||
+        _cpfKey.currentState?.validate() == false ||
+        _emailKey.currentState?.validate() == false ||
+        _dataNascimentoKey.currentState?.validate() == false) {
+      return;
+    }
+    if (_diabetes == 0 ||
+        _hipertensao == 0 ||
+        _sexo == 0 ||
+        _alergia == 0 ||
+        _doenca == 0 ||
+        _medicacao == 0 ||
+        _procEstetico == 0 ||
+        (_alergia == 1 && _alergiaController.text.isEmpty) ||
+        (_doenca == 1 && _doencaController.text.isEmpty) ||
+        (_medicacao == 1 && _medicacaoController.text.isEmpty) ||
+        (_procEstetico == 1 && _procEsteticoController.text.isEmpty)) {
+      return;
+    }
+
+    if (_alergia == 2) {
+      _alergiaController.text = "";
+    }
+    if (_doenca == 2) {
+      _doencaController.text = "";
+    }
+    if (_medicacao == 2) {
+      _medicacaoController.text = "";
+    }
+    if (_procEstetico == 2) {
+      _procEsteticoController.text = "";
+    }
+
+    _nomeKey.currentState?.save();
+    _cpfKey.currentState?.save();
+    _telefoneKey.currentState?.save();
+    _emailKey.currentState?.save();
+    _dataNascimentoKey.currentState?.save();
+
+    String nome = _nomeController.text;
+    String cpf = _cpfController.text;
+    String telefone = _telefoneController.text;
+    String email = _emailController.text;
+    String dataNascimento = _dataNascimentoController.text;
+    int sexo = _sexo;
+    int diabetes = _diabetes;
+    int hipertensao = _hipertensao;
+    String alergia = _alergiaController.text;
+    String doenca = _doencaController.text;
+    String medicacao = _medicacaoController.text;
+    String procEstetico = _procEsteticoController.text;
+
+    if (!edicao) {
+      Cliente clienteLocal = Cliente(
+          nome: nome,
+          cpf: cpf,
+          telefone: telefone,
+          email: email,
+          dataNascimento: dataNascimento,
+          sexo: sexo,
+          diabetes: diabetes,
+          hipertensao: hipertensao,
+          alergia: alergia,
+          doenca: doenca,
+          medicacao: medicacao,
+          procEstetico: procEstetico);
+      await addCliente(clienteLocal);
+      setState(() {
+        clienteList.add(clienteLocal);
+      });
+    } else {
+      _cliente = Cliente(
+          nome: nome,
+          cpf: cpf,
+          telefone: telefone,
+          email: email,
+          dataNascimento: dataNascimento,
+          sexo: sexo,
+          diabetes: diabetes,
+          hipertensao: hipertensao,
+          alergia: alergia,
+          doenca: doenca,
+          medicacao: medicacao,
+          procEstetico: procEstetico,
+          id: id);
+      await updateCliente(_cliente);
+    }
+    resetData();
+    setState(() {
+      Navigator.popAndPushNamed(context, "/home");
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Cadastro realizado com sucesso!")));
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     while (fetching) {
       return const Center(
         child: CircularProgressIndicator(),
       );
-    }
-
-    editar();
-
-    Future<int> addCliente(Cliente cliente) async {
-      return await clienteRepository.salvarClientes(cliente);
-    }
-
-    Future<int> updateCliente(Cliente cliente) async {
-      return await clienteRepository.atualizarClientes(cliente);
-    }
-
-    void resetData() {
-      _nomeController.clear();
-      _cpfController.clear();
-      _emailController.clear();
-      _telefoneController.clear();
-      _dataNascimentoController.clear();
-      _alergiaController.clear();
-      _doencaController.clear();
-      _medicacaoController.clear();
-      _procEsteticoController.clear();
-      edicao = false;
-    }
-
-    Future<void> salvar() async {
-      if (_nomeKey.currentState?.validate() == false ||
-          _cpfKey.currentState?.validate() == false ||
-          _emailKey.currentState?.validate() == false ||
-          _dataNascimentoKey.currentState?.validate() == false) {
-        return;
-      }
-      if (_diabetes == 0 ||
-          _hipertensao == 0 ||
-          _sexo == 0 ||
-          _alergia == 0 ||
-          _doenca == 0 ||
-          _medicacao == 0 ||
-          _procEstetico == 0 ||
-          (_alergia == 1 && _alergiaController.text.isEmpty) ||
-          (_doenca == 1 && _doencaController.text.isEmpty) ||
-          (_medicacao == 1 && _medicacaoController.text.isEmpty) ||
-          (_procEstetico == 1 && _procEsteticoController.text.isEmpty)) {
-        return;
-        /*  NAO PODE MAIS POR SER FUTURE
-          return await Alert(
-          context: context,
-          type: AlertType.none,
-          title: "Campos vazios..",
-          desc: "Certifique-se de preencher todos os campos obrigatórios.",
-          buttons: [
-            DialogButton(
-              gradient: const LinearGradient(colors: [
-                Color.fromRGBO(172, 132, 207, 1),
-                Color.fromRGBO(116, 116, 191, 1.0),
-              ]),
-              width: 120,
-              onPressed: () => Navigator.pop(context),
-              child: const Text(
-                "Entendi",
-                style: TextStyle(color: Colors.white, fontSize: 20),
-              ),
-            )
-          ],
-        ).show()
-    */
-      }
-
-      _nomeKey.currentState?.save();
-      _cpfKey.currentState?.save();
-      _telefoneKey.currentState?.save();
-      _emailKey.currentState?.save();
-      _dataNascimentoKey.currentState?.save();
-
-      String nome = _nomeController.text;
-      String cpf = _cpfController.text;
-      String telefone = _telefoneController.text;
-      String email = _emailController.text;
-      String dataNascimento = _dataNascimentoController.text;
-      int sexo = _sexo;
-      int diabetes = _diabetes;
-      int hipertensao = _hipertensao;
-      String alergia = _alergiaController.text;
-      String doenca = _doencaController.text;
-      String medicacao = _medicacaoController.text;
-      String procEstetico = _procEsteticoController.text;
-
-      if (!edicao) {
-        Cliente clienteLocal = Cliente(
-            nome: nome,
-            cpf: cpf,
-            telefone: telefone,
-            email: email,
-            dataNascimento: dataNascimento,
-            sexo: sexo,
-            diabetes: diabetes,
-            hipertensao: hipertensao,
-            alergia: alergia,
-            doenca: doenca,
-            medicacao: medicacao,
-            procEstetico: procEstetico);
-        await addCliente(clienteLocal);
-        setState(() {
-          clienteList.add(clienteLocal);
-        });
-      } else {
-        _cliente = Cliente(
-            nome: nome,
-            cpf: cpf,
-            telefone: telefone,
-            email: email,
-            dataNascimento: dataNascimento,
-            sexo: sexo,
-            diabetes: diabetes,
-            hipertensao: hipertensao,
-            alergia: alergia,
-            doenca: doenca,
-            medicacao: medicacao,
-            procEstetico: procEstetico);
-        await updateCliente(_cliente);
-      }
-      resetData();
-      setState(() {
-        Navigator.popAndPushNamed(context, "/home");
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Cadastro realizado com sucesso!")));
-      });
     }
 
     return WillPopScope(
