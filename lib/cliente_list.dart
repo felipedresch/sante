@@ -16,6 +16,7 @@ class ClienteList extends StatefulWidget {
 
 class _ClienteListState extends State<ClienteList> {
   late ClienteRepository clienteRepository;
+  late TrackScreens tracks;
   //late Cliente _cliente;
   Cadastro forms = const Cadastro();
   Home home = const Home();
@@ -27,6 +28,7 @@ class _ClienteListState extends State<ClienteList> {
   void initState() {
     super.initState();
     clienteRepository = ClienteRepository();
+    tracks = TrackScreens();
     clienteRepository.initDB().whenComplete(() async {
       setState(() {});
     });
@@ -34,13 +36,13 @@ class _ClienteListState extends State<ClienteList> {
 
   @override
   Widget build(BuildContext context) {
-    TrackScreens track = Provider.of<TrackScreens>(context);
-    if (track.fromConsulta) {
+    tracks = Provider.of<TrackScreens>(context);
+    if (tracks.fromConsulta) {
       titulo = "Nova Consulta";
-      track.fromHome = false;
+      tracks.fromHome = false;
     } else {
       titulo = "Lista de clientes";
-      track.fromConsulta = false;
+      tracks.fromConsulta = false;
     }
     return WillPopScope(
       onWillPop: () async => false,
@@ -89,10 +91,10 @@ class _ClienteListState extends State<ClienteList> {
                                   child: GestureDetector(
                                     behavior: HitTestBehavior.opaque,
                                     onTap: () {
-                                      if (track.fromConsulta) {
-                                        track.cliente = snapshot.data![position];
-                                        track.fromConsulta = false;
-                                        track.fromClienteList = true;
+                                      if (tracks.fromConsulta) {
+                                        tracks.cliente = snapshot.data![position];
+                                        tracks.fromConsulta = false;
+                                        tracks.fromClienteList = true;
                                         Navigator.popAndPushNamed(
                                             context, "/consulta");
                                       } else {
@@ -141,7 +143,7 @@ class _ClienteListState extends State<ClienteList> {
                                                     fontSize: 18.0),
                                               ),
                                             ),
-                                            (!track.fromConsulta)
+                                            (!tracks.fromConsulta)
                                                 ? ConstrainedBox(
                                                     constraints:
                                                         const BoxConstraints(

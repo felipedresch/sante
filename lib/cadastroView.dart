@@ -34,6 +34,7 @@ class _CadastroViewState extends State<CadastroView> {
   int _procEstetico = 0;
   final TextEditingController _procEsteticoController = TextEditingController();
   late ClienteRepository clienteRepository;
+  late TrackScreens tracks;
   //late Sessao consulta;
   List<Cliente> clienteList = [];
   List<Sessao> consultaList = [];
@@ -45,6 +46,7 @@ class _CadastroViewState extends State<CadastroView> {
   void initState() {
     super.initState();
     clienteRepository = ClienteRepository();
+    tracks = TrackScreens();
     clienteRepository.initDB().whenComplete(() async {
       getData();
       //setState(() {});
@@ -91,7 +93,7 @@ class _CadastroViewState extends State<CadastroView> {
 
   @override
   Widget build(BuildContext context) {
-    TrackScreens track = Provider.of<TrackScreens>(context);
+    tracks = Provider.of<TrackScreens>(context);
     int? index;
 
     while (fetching) {
@@ -911,7 +913,7 @@ class _CadastroViewState extends State<CadastroView> {
                                       consultasCliente
                                           .first;
                                   clienteRepository.indexConsulta = 0;
-                                  track.consultasCliente = consultasCliente;
+                                  tracks.consultasCliente = consultasCliente;
                                   Navigator.popAndPushNamed(
                                       context, '/consultaView');
                                 },
@@ -936,7 +938,7 @@ class _CadastroViewState extends State<CadastroView> {
                                         consultasCliente[
                                             index];
                                     clienteRepository.indexConsulta = index;
-                                    track.consultasCliente = consultasCliente;
+                                    tracks.consultasCliente = consultasCliente;
                                     Navigator.popAndPushNamed(
                                         context, '/consultaView');
                                   },

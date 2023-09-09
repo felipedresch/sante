@@ -18,50 +18,52 @@ class Consulta extends StatefulWidget {
 
 class _ConsultaState extends State<Consulta> {
   final _clienteKey = GlobalKey<FormState>();
-  TextEditingController _clienteController = TextEditingController();
+  final TextEditingController _clienteController = TextEditingController();
   final _dataKey = GlobalKey<FormState>();
-  TextEditingController _dataController = TextEditingController();
+  final TextEditingController _dataController = TextEditingController();
   final _valorKey = GlobalKey<FormState>();
-  TextEditingController _valorController = TextEditingController();
+  final TextEditingController _valorController = TextEditingController();
   final _pagamentoKey = GlobalKey<FormState>();
-  TextEditingController _pagamentoController = TextEditingController();
+  final TextEditingController _pagamentoController = TextEditingController();
   final _observacoesKey = GlobalKey<FormState>();
-  TextEditingController _observacoesController = TextEditingController();
+  final TextEditingController _observacoesController = TextEditingController();
   final _pesoKey = GlobalKey<FormState>();
-  TextEditingController _pesoController = TextEditingController();
+  final TextEditingController _pesoController = TextEditingController();
   final _alturaKey = GlobalKey<FormState>();
-  TextEditingController _alturaController = TextEditingController();
+  final TextEditingController _alturaController = TextEditingController();
   final _estomagoKey = GlobalKey<FormState>();
-  TextEditingController _estomagoController = TextEditingController();
+  final TextEditingController _estomagoController = TextEditingController();
   final _cinturaKey = GlobalKey<FormState>();
-  TextEditingController _cinturaController = TextEditingController();
+  final TextEditingController _cinturaController = TextEditingController();
   final _quadrilKey = GlobalKey<FormState>();
-  TextEditingController _quadrilController = TextEditingController();
+  final  _quadrilController = TextEditingController();
   final _umbigoKey = GlobalKey<FormState>();
-  TextEditingController _umbigoController = TextEditingController();
+  final TextEditingController _umbigoController = TextEditingController();
   final _queixaKey = GlobalKey<FormState>();
-  TextEditingController _queixaController = TextEditingController();
+  final TextEditingController _queixaController = TextEditingController();
   final _alimentacaoKey = GlobalKey<FormState>();
-  TextEditingController _alimentacaoController = TextEditingController();
+  final TextEditingController _alimentacaoController = TextEditingController();
   final _tratamentoKey = GlobalKey<FormState>();
-  TextEditingController _tratamentoController = TextEditingController();
+  final TextEditingController _tratamentoController = TextEditingController();
   int _exFisico = 0;
   int _hidratacao = 0;
   late ConsultaRepository consultaRepository;
   late ClienteRepository clienteRepository;
+  late TrackScreens tracks;
   late Sessao _consulta;
   bool fetching = true;
   bool edicao = false;
+  int? index;
+  int? id;
   String title = "";
   List<Sessao> consultaList = [];
   List<Cliente> clienteList = [];
-
-  int? index;
 
   @override
   void initState() {
     super.initState();
     clienteRepository = ClienteRepository();
+    tracks = TrackScreens();
     clienteRepository.initDB().whenComplete(() async {
       getData();
     });
@@ -72,6 +74,7 @@ class _ConsultaState extends State<Consulta> {
     clienteList = await clienteRepository.recuperarClientes();
     setState(() {
       fetching = false;
+      editar();
     });
   }
 
@@ -93,47 +96,18 @@ class _ConsultaState extends State<Consulta> {
     //return resultado;
   }
 
-  @override
-  Widget build(BuildContext context) {
-    TrackScreens track = Provider.of<TrackScreens>(context);
-
-    Future<int> addConsulta(Sessao consulta) async {
+  Future<int> addConsulta(Sessao consulta) async {
       return await clienteRepository.salvarConsultas(consulta);
     }
 
-    Future<int> updateConsultas(Sessao consultas) async {
-      return await clienteRepository.atualizarConsultas(consultas);
-    }
+  Future<int> updateConsultas(Sessao consulta) async {
+    return await clienteRepository.atualizarConsultas(consulta);
+    
+  }
 
-    void resetData() {
-      _dataController.clear();
-      _valorController.clear();
-      _pagamentoController.clear();
-      _pesoController.clear();
-      _alturaController.clear();
-      _estomagoController.clear();
-      _cinturaController.clear();
-      _quadrilController.clear();
-      _umbigoController.clear();
-      _umbigoController.clear();
-      _queixaController.clear();
-      _alimentacaoController.clear();
-      _tratamentoController.clear();
-      _queixaController.clear();
-      _observacoesController.clear();
-      _exFisico = 0;
-      _hidratacao = 0;
-      edicao = false;
-      track.cliente = null;
-      track.fromConsulta = false;
-    }
-
-    if (track.fromClienteList) {
-      //Se vier da lista é pq está escolhendo alguem para nova consulta
-      _clienteController.text = track.cliente!.nome;
-    }
-
+  editar(){
     if (clienteRepository.indexConsulta != null && !fetching) {
+      consultaList = tracks.consultasCliente;
       edicao = true;
       setState(() {
         title = "Editar Consulta";
@@ -162,10 +136,36 @@ class _ConsultaState extends State<Consulta> {
       _observacoesController.text = consultaList[index!].observacoes ?? "";
       _exFisico = consultaList[index!].exFisico ?? 0;
       _hidratacao = consultaList[index!].hidratacao ?? 0;
+      id = consultaList[index!].id;
+
     } else {
       setState(() {
         title = "Nova Consulta";
       });
+    }
+  }
+
+  void resetData() {
+      _dataController.clear();
+      _valorController.clear();
+      _pagamentoController.clear();
+      _pesoController.clear();
+      _alturaController.clear();
+      _estomagoController.clear();
+      _cinturaController.clear();
+      _quadrilController.clear();
+      _umbigoController.clear();
+      _umbigoController.clear();
+      _queixaController.clear();
+      _alimentacaoController.clear();
+      _tratamentoController.clear();
+      _queixaController.clear();
+      _observacoesController.clear();
+      _exFisico = 0;
+      _hidratacao = 0;
+      edicao = false;
+      tracks.cliente = null;
+      tracks.fromConsulta = false;
     }
 
     Future<void> save() async {
@@ -209,7 +209,7 @@ class _ConsultaState extends State<Consulta> {
             observacoes: _observacoesController.text,
             exFisico: _exFisico,
             hidratacao: _hidratacao,
-            clienteID: track.cliente!.id!.toInt());
+            clienteID: tracks.cliente!.id!.toInt());
         await addConsulta(consulta);
         setState(() {
           consultaList.add(consulta);
@@ -231,13 +231,16 @@ class _ConsultaState extends State<Consulta> {
             observacoes: _observacoesController.text,
             exFisico: _exFisico,
             hidratacao: _hidratacao,
-            clienteID: consultaList[index!].clienteID);
+            clienteID: consultaList[index!].clienteID,
+            id: id);
         await updateConsultas(_consulta);
       }
-      if (track.fromClienteList) {
-        track.fromClienteList = false;
+
+      if (tracks.fromClienteList) {
+        tracks.fromClienteList = false;
       }
-      track.fromConsulta = false;
+      tracks.fromConsulta = false;
+
       resetData();
       setState(() {
         Navigator.popAndPushNamed(context, "/home");
@@ -246,6 +249,15 @@ class _ConsultaState extends State<Consulta> {
       });
     }
 
+  @override
+  Widget build(BuildContext context) {
+    tracks = Provider.of<TrackScreens>(context);
+
+    if (tracks.fromClienteList) {
+      //Se vier da lista é pq está escolhendo alguem para nova consulta
+      _clienteController.text = tracks.cliente!.nome;
+    }
+    
     return WillPopScope(
       onWillPop: () async => false,
       child: Scaffold(
@@ -255,8 +267,8 @@ class _ConsultaState extends State<Consulta> {
                 if (clienteRepository.indexConsulta != null) {
                   clienteRepository.indexConsulta = null;
                 }
-                track.fromClienteList = false;
-                track.fromConsulta = false;
+                tracks.fromClienteList = false;
+                tracks.fromConsulta = false;
                 Navigator.pop(context);
                 //Navigator.popAndPushNamed(context, '/home');
               },
@@ -286,7 +298,7 @@ class _ConsultaState extends State<Consulta> {
                       readOnly: edicao ? false : true,
                       onTap: () {
                         if (!edicao) {
-                          track.fromConsulta = true;
+                          tracks.fromConsulta = true;
                           Navigator.popAndPushNamed(context, "/list");
                         }
                       },

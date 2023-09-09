@@ -33,6 +33,7 @@ class _ConsultaViewState extends State<ConsultaView> {
   int _hidratacao = 0;
 
   late ClienteRepository clienteRepository;
+  late TrackScreens tracks;
   bool fetching = true;
   List<Sessao> consultaList = [];
   int? index;
@@ -41,6 +42,7 @@ class _ConsultaViewState extends State<ConsultaView> {
   void initState() {
     super.initState();
     clienteRepository = ClienteRepository();
+    tracks = TrackScreens();
     clienteRepository.initDB().whenComplete(() async {
       getData();
       setState(() {});
@@ -56,10 +58,10 @@ class _ConsultaViewState extends State<ConsultaView> {
 
   @override
   Widget build(BuildContext context) {
-    TrackScreens track = Provider.of<TrackScreens>(context);
+    tracks = Provider.of<TrackScreens>(context);
 
     if (clienteRepository.indexConsulta != null) {
-      consultaList = track.consultasCliente;
+      consultaList = tracks.consultasCliente;
       index = clienteRepository.indexConsulta;
       _dataController.text = consultaList[index!].data;
       _valorController.text = consultaList[index!].valor.toString();
@@ -547,7 +549,7 @@ class _ConsultaViewState extends State<ConsultaView> {
                   ),
                   onPressed: () {
                     setState(() {
-                      track.fromConsulta = true;
+                      tracks.fromConsulta = true;
                       Navigator.popAndPushNamed(context, '/consulta');
                     });
                   },
@@ -577,7 +579,7 @@ class _ConsultaViewState extends State<ConsultaView> {
                     await clienteRepository
                         .removerConsulta(consultaList.elementAt(index!).id!);
                     consultaList.removeAt(index!);
-                    track.consultasCliente.removeAt(index!);
+                    tracks.consultasCliente.removeAt(index!);
                     //EXIBIR NOTIFICACAO PERGUNTANDO SE DESEJA EXCLUIR
                     //Navigator.popAndPushNamed(context, "/home");
                     setState(() {
