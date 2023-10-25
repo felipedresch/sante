@@ -73,7 +73,9 @@ class ClienteRepository extends ChangeNotifier {
 
   Future<List<Cliente>> recuperarClientes() async {
     final List<Map<String, Object?>> queryResult = await db.query('clientes');
-    return queryResult.map((e) => Cliente.fromMap(e)).toList();
+    List<Cliente> lista = queryResult.map((e) => Cliente.fromMap(e)).toList();
+    lista.sort((a, b) => a.nome.toLowerCase().compareTo(b.nome.toString().toLowerCase()));
+        return lista;
   }
 
   Future<int> salvarClientes(Cliente cliente) async {
