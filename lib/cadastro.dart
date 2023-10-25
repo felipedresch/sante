@@ -391,8 +391,8 @@ class _CadastroState extends State<Cadastro> {
                       ),
                       keyboardType: TextInputType.emailAddress,
                       validator: (value) {
-                        if (value!.isNotEmpty &&
-                            (!value.contains("@") || !value.contains("."))) {
+                        if (!RegExp(r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,5}))$')
+                            .hasMatch(value!) && value.isNotEmpty) {
                           return "E-mail inválido!";
                         }
                         return null;
