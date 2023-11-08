@@ -1,8 +1,10 @@
+
+
 import 'package:flutter/material.dart';
+import 'package:sante/models/picture_model.dart';
 import 'package:sqflite/sqflite.dart';
 import '../models/cliente_model.dart';
 import 'package:path/path.dart';
-
 import '../models/consulta_model.dart';
 
 class ClienteRepository extends ChangeNotifier {
@@ -25,6 +27,7 @@ class ClienteRepository extends ChangeNotifier {
       onCreate: (database, version) async {
         await database.execute(_clientes);
         await database.execute(_consultas);
+        await database.execute(_pictures);
       },
       version: 1,
     );
@@ -68,6 +71,18 @@ class ClienteRepository extends ChangeNotifier {
       exFisico INTEGER,
       cliente_id INTEGER,
       FOREIGN KEY (cliente_id) REFERENCES clientes(id)
+    );
+  ''';
+
+  String get _pictures => '''
+    CREATE TABLE pictures (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT,
+      path TEXT,
+      clienteID INTEGER,
+      consultaID INTEGER,
+      FOREIGN KEY (clienteID) REFERENCES clientes(id),
+      FOREIGN KEY (consultaID) REFERENCES consultas(id)
     );
   ''';
 
@@ -132,6 +147,18 @@ class ClienteRepository extends ChangeNotifier {
     );
     notifyListeners();
   }
+
+  Future<int> savePicture(Picture picture) async {
+    int result = await db.insert('pictures', picture.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace);
+    return result;
+  }
+
+  Future<List<Picture>> getPictures() async {
+    final List<Map<String, Object?>> queryResult = await db.query('pictures');
+    return queryResult.map((e) => Picture.fromMap(e)).toList();
+  }
+
 
   Future deleteTable(String tableName) async {
     final db = ClienteRepository().db;

@@ -1,8 +1,10 @@
+import 'dart:io';
 import 'package:brasil_fields/brasil_fields.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:sante/container_all.dart';
+import 'package:sante/models/picture_model.dart';
 import 'package:sante/repositories/cliente_repository.dart';
 import 'package:sante/repositories/track_screens.dart';
 import 'models/consulta_model.dart';
@@ -36,7 +38,11 @@ class _ConsultaViewState extends State<ConsultaView> {
   late TrackScreens tracks;
   bool fetching = true;
   List<Sessao> consultaList = [];
+  List<Picture> listaFotos = [];
+  List<Picture> listaFotosFiltradas = [];
+  List<Sessao> consultasFiltradas = [];
   int? index;
+  int currentPageIndex = 0;
 
   @override
   void initState() {
@@ -51,9 +57,20 @@ class _ConsultaViewState extends State<ConsultaView> {
 
   void getData() async {
     consultaList = await clienteRepository.recuperarConsultas();
+    listaFotos = await clienteRepository.getPictures();
     setState(() {
       fetching = false;
+      filtrarFotos();
     });
+  }
+
+  List<Picture> filtrarFotos(){
+    for (var element in listaFotos) {
+      if (element.consultaID == clienteRepository.consultaSelected!.id!) {
+        listaFotosFiltradas.add(element);
+      }
+    }
+    return listaFotosFiltradas;
   }
 
   @override
@@ -84,9 +101,27 @@ class _ConsultaViewState extends State<ConsultaView> {
       }
     }
 
+    //(index == 0)
+    //? infoSection()
+    //: imageSection()
     return WillPopScope(
       onWillPop: () async => false,
       child: Scaffold(
+        bottomNavigationBar: NavigationBar(
+          labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
+          //backgroundColor: Color.fromARGB(255, 203, 145, 230),
+          height: 60,
+          destinations: const [
+            NavigationDestination(icon: Icon(Icons.text_snippet_outlined), label: "Informações"),
+            NavigationDestination(icon: Icon(Icons.filter), label: "Imagens anexadas")
+          ],
+          selectedIndex: currentPageIndex,
+          onDestinationSelected: (int index) {
+            setState(() {
+              currentPageIndex = index;
+            });
+          },
+        ),
         appBar: AppBar(
             leading: BackButton(
               onPressed: () {
@@ -97,7 +132,52 @@ class _ConsultaViewState extends State<ConsultaView> {
             ),
             backgroundColor: Theme.of(context).colorScheme.inversePrimary,
             title: const Text("Visualizar Consulta")),
-        body: ContainerAll(
+        body: <Widget> [
+          infoSection(),
+          imageSection()][currentPageIndex],
+      ),
+    );
+  }
+
+  Widget imageSection(){
+    //return Image.memory(listaFotos.elementAt(0).picture);
+    if (listaFotosFiltradas.isNotEmpty) {
+      return ContainerAll(
+        child: GridView.builder(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+             mainAxisSpacing: 4,
+              crossAxisSpacing: 4,
+              
+            ),
+          itemCount: listaFotosFiltradas.length,
+          itemBuilder: (context, index){
+            return Material(
+              color: Theme.of(context).primaryColor.withOpacity(0.1),
+              child: InkWell(
+                splashColor: Theme.of(context).primaryColor.withOpacity(0.25),
+                onTap: () {
+                  //exibir imgagens fullscreen
+                },
+                onLongPress: () {
+                  //exibir opção de apagar imagem
+                },
+                child: Ink.image(
+                  image: FileImage(File(listaFotosFiltradas[index].path)),
+                  fit: BoxFit.cover,
+                ),
+              ),
+            );
+          },
+          ),
+      );
+    }
+    return const Center(child: Text("Sem imagens para essa consulta"));
+    
+  }
+
+  Widget infoSection(){
+    return ContainerAll(
           child: ListView(
             scrollDirection: Axis.vertical,
             children: <Widget>[
@@ -603,8 +683,6 @@ class _ConsultaViewState extends State<ConsultaView> {
               ),
             ],
           ),
-        ),
-      ),
-    );
+        );
   }
 }
