@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:sante/container_all.dart';
+import 'package:sante/fullscreen.dart';
 import 'package:sante/models/picture_model.dart';
 import 'package:sante/repositories/cliente_repository.dart';
 import 'package:sante/repositories/track_screens.dart';
@@ -104,46 +105,48 @@ class _ConsultaViewState extends State<ConsultaView> {
     //(index == 0)
     //? infoSection()
     //: imageSection()
-    return WillPopScope(
-      onWillPop: () async => false,
-      child: Scaffold(
-        bottomNavigationBar: NavigationBar(
-          labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
-          //backgroundColor: Color.fromARGB(255, 203, 145, 230),
-          height: 60,
-          destinations: const [
-            NavigationDestination(icon: Icon(Icons.text_snippet_outlined), label: "Informações"),
-            NavigationDestination(icon: Icon(Icons.filter), label: "Imagens anexadas")
-          ],
-          selectedIndex: currentPageIndex,
-          onDestinationSelected: (int index) {
-            setState(() {
-              currentPageIndex = index;
-            });
-          },
-        ),
-        appBar: AppBar(
-            leading: BackButton(
-              onPressed: () {
-                //Exibir mensagem pedindo se deseja sair sem salvar as alterações no cadastro
-                clienteRepository.indexConsulta = null;
-                Navigator.popAndPushNamed(context, "/view");
-              },
-            ),
-            backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-            title: const Text("Visualizar Consulta")),
-        body: <Widget> [
-          infoSection(),
-          imageSection()][currentPageIndex],
+    return Scaffold(
+      bottomNavigationBar: NavigationBar(
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
+        //backgroundColor: Color.fromARGB(255, 203, 145, 230),
+        height: 60,
+        destinations: const [
+          NavigationDestination(icon: Icon(Icons.text_snippet_outlined), label: "Informações"),
+          NavigationDestination(icon: Icon(Icons.filter), label: "Imagens anexadas")
+        ],
+        selectedIndex: currentPageIndex,
+        onDestinationSelected: (int index) {
+          setState(() {
+            currentPageIndex = index;
+          });
+        },
       ),
+      appBar: AppBar(
+          leading: BackButton(
+            onPressed: () {
+              //Exibir mensagem pedindo se deseja sair sem salvar as alterações no cadastro
+              clienteRepository.indexConsulta = null;
+              Navigator.popAndPushNamed(context, "/view");
+            },
+          ),
+          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          title: const Text("Visualizar Consulta")),
+      body: <Widget> [
+        infoSection(),
+        imageSection()][currentPageIndex],
     );
   }
+  
+  //TODO: botar um floating action button para adicionar mais imgs na galeria das consultas
 
   Widget imageSection(){
     //return Image.memory(listaFotos.elementAt(0).picture);
     if (listaFotosFiltradas.isNotEmpty) {
       return ContainerAll(
         child: GridView.builder(
+          physics: const BouncingScrollPhysics(
+          parent: AlwaysScrollableScrollPhysics(),
+        ),
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
              mainAxisSpacing: 4,
@@ -157,15 +160,23 @@ class _ConsultaViewState extends State<ConsultaView> {
               child: InkWell(
                 splashColor: Theme.of(context).primaryColor.withOpacity(0.25),
                 onTap: () {
-                  //exibir imgagens fullscreen
+                  Navigator.push(
+                    context, 
+                    MaterialPageRoute(
+                      builder: (_) => Fullscreen(listaFotosFiltradas: listaFotosFiltradas, index: index),
+                    ),
+                  );
                 },
                 onLongPress: () {
                   //exibir opção de apagar imagem
                 },
-                child: Ink.image(
-                  image: FileImage(File(listaFotosFiltradas[index].path)),
-                  fit: BoxFit.cover,
-                ),
+                //child: Hero(
+                  //tag: listaFotosFiltradas[index],
+                  child: Ink.image(
+                    image: FileImage(File(listaFotosFiltradas[index].path)),
+                    fit: BoxFit.cover,
+                  ),
+                //),
               ),
             );
           },
@@ -629,6 +640,8 @@ class _ConsultaViewState extends State<ConsultaView> {
                   ),
                   onPressed: () {
                     setState(() {
+                      clienteRepository.indexConsulta = index;
+                      //tracks.cliente = clienteRepository.clienteSelected;
                       tracks.fromConsulta = true;
                       Navigator.popAndPushNamed(context, '/consulta');
                     });

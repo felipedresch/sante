@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:sante/container_all.dart';
 import 'package:sante/models/cliente_model.dart';
 import 'package:sante/models/picture_model.dart';
@@ -282,6 +283,10 @@ class _ConsultaState extends State<Consulta> {
       await updateConsultas(_consulta);
     }
 
+    //TODO: Consertar bug onde as fotos adicionadas na edição de conusltas vão para outro
+    //usuário. cadastroView -> consultaView -> consulta (edição)
+    //nesse trajeto se perde o ID do cliente atual
+
 
     //salva as fotos no banco de dados
     if (listaFotosPaths.isNotEmpty) {
@@ -322,574 +327,602 @@ class _ConsultaState extends State<Consulta> {
       _clienteController.text = tracks.cliente!.nome;
     }
 
-    return WillPopScope(
-      onWillPop: () async => false,
-      child: Scaffold(
-        appBar: AppBar(
-            leading: BackButton(
-              onPressed: () {
-                if (clienteRepository.indexConsulta != null) {
-                  clienteRepository.indexConsulta = null;
-                }
-                tracks.fromClienteList = false;
-                tracks.fromConsulta = false;
-                Navigator.pop(context);
-                //Navigator.popAndPushNamed(context, '/home');
-              },
-            ),
-            backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-            title: Text(title)),
-        body: ContainerAll(
-          child: SingleChildScrollView(
-            scrollDirection: Axis.vertical,
-            child: Column(
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
-                  child: Form(
-                    key: _clienteKey,
-                    child: TextFormField(
-                      controller: _clienteController,
-                      style: const TextStyle(fontSize: 16),
-                      decoration: const InputDecoration(
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(),
-                        labelText: "Nome do Cliente",
-                        prefixIcon: Icon(Icons.person),
-                      ),
-                      keyboardType: TextInputType.name,
-                      readOnly: edicao ? false : true,
-                      onTap: () {
-                        if (!edicao) {
-                          tracks.fromConsulta = true;
-                          Navigator.popAndPushNamed(context, "/list");
-                        }
-                      },
+    return Scaffold(
+      appBar: AppBar(
+          leading: BackButton(
+            onPressed: () {
+              Alert(
+                context: context,
+                type: AlertType.warning,
+                title: "A consulta não foi salva",
+                desc: "Deseja sair e descartar as informações?",
+                buttons: [
+                  DialogButton(
+                    onPressed: () {
+                      if (clienteRepository.indexConsulta != null) {
+                        clienteRepository.indexConsulta = null;
+                      }
+                      tracks.fromClienteList = false;
+                      tracks.fromConsulta = false;
+                      Navigator.pop(context);
+                    },
+                    gradient: const LinearGradient(colors: [
+                      Color.fromRGBO(172, 132, 207, 1),
+                      Color.fromRGBO(116, 116, 191, 1.0),
+                    ]),
+                    child: const Text(
+                      "Sair",
+                      style: TextStyle(color: Colors.white, fontSize: 20),
                     ),
                   ),
+                  DialogButton(
+                    onPressed: () => Navigator.pop(context),
+                    gradient: const LinearGradient(colors: [
+                      Color.fromRGBO(116, 116, 191, 1.0),
+                      Color.fromRGBO(172, 132, 207, 1),
+                    ]),
+                    child: const Text(
+                      "Ficar",
+                      style: TextStyle(color: Colors.white, fontSize: 20),
+                    ),
+                  )
+                ],
+              ).show();
+              //Navigator.popAndPushNamed(context, '/home');
+            },
+          ),
+          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          title: Text(title)),
+      body: ContainerAll(
+        child: SingleChildScrollView(
+          scrollDirection: Axis.vertical,
+          child: Column(
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+                child: Form(
+                  key: _clienteKey,
+                  child: TextFormField(
+                    controller: _clienteController,
+                    style: const TextStyle(fontSize: 16),
+                    decoration: const InputDecoration(
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(),
+                      labelText: "Nome do Cliente",
+                      prefixIcon: Icon(Icons.person),
+                    ),
+                    keyboardType: TextInputType.name,
+                    readOnly: edicao ? false : true,
+                    onTap: () {
+                      if (!edicao) {
+                        tracks.fromConsulta = true;
+                        Navigator.popAndPushNamed(context, "/list");
+                      }
+                    },
+                  ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
-                  //form Data da Consulta
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+                //form Data da Consulta
+                child: Form(
+                  key: _dataKey,
+                  child: TextFormField(
+                    controller: _dataController,
+                    style: const TextStyle(fontSize: 16),
+                    decoration: const InputDecoration(
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(),
+                      labelText: "Data da Consulta",
+                      prefixIcon: Icon(Icons.date_range_outlined),
+                    ),
+                    keyboardType: TextInputType.number,
+                    validator: (value) {
+                      if (value!.isEmpty || value.length != 10) {
+                        return "Data inválida!";
+                      } else {
+                        return null;
+                      }
+                    },
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                      DataInputFormatter(),
+                    ],
+                  ),
+                ),
+              ),
+              Row(
+                children: <Widget>[
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.5,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+                      child: Form(
+                        key: _valorKey,
+                        child: TextFormField(
+                          controller: _valorController,
+                          style: const TextStyle(fontSize: 16),
+                          decoration: const InputDecoration(
+                            filled: true,
+                            fillColor: Colors.white,
+                            border: OutlineInputBorder(),
+                            labelText: "Valor",
+                            prefixIcon: Icon(Icons.attach_money),
+                            prefix: Padding(
+                              padding: EdgeInsets.fromLTRB(0, 0, 10, 0),
+                              child: Text("R\$:"),
+                            ),
+                          ),
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                            RealInputFormatter()
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.5,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+                      child: Form(
+                        key: _pagamentoKey,
+                        child: TextFormField(
+                          controller: _pagamentoController,
+                          style: const TextStyle(fontSize: 16),
+                          decoration: const InputDecoration(
+                            filled: true,
+                            fillColor: Colors.white,
+                            border: OutlineInputBorder(),
+                            labelText: "Pagamento",
+                            prefixIcon: Icon(Icons.payment),
+                          ),
+                          keyboardType: TextInputType.text,
+                          inputFormatters: [
+                            LengthLimitingTextInputFormatter(20)
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                children: <Widget>[
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.5,
+                    child: Padding(
+                      //form Peso
+                      padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+                      child: Form(
+                        key: _pesoKey,
+                        child: TextFormField(
+                          controller: _pesoController,
+                          style: const TextStyle(fontSize: 16),
+                          decoration: const InputDecoration(
+                            filled: true,
+                            fillColor: Colors.white,
+                            border: OutlineInputBorder(),
+                            labelText: "Peso",
+                            prefixIcon: Icon(Icons.scale),
+                            suffix: Padding(
+                              padding: EdgeInsets.fromLTRB(0, 0, 10, 0),
+                              child: Text('Kg'),
+                            ),
+                          ),
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                            PesoInputFormatter()
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.5,
+                    child: Padding(
+                      //form Altura
+                      padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+                      child: Form(
+                        key: _alturaKey,
+                        child: TextFormField(
+                          controller: _alturaController,
+                          style: const TextStyle(fontSize: 16),
+                          decoration: const InputDecoration(
+                            filled: true,
+                            fillColor: Colors.white,
+                            border: OutlineInputBorder(),
+                            labelText: "Altura",
+                            prefixIcon: Icon(Icons.height),
+                            suffix: Padding(
+                              padding: EdgeInsets.fromLTRB(0, 0, 10, 0),
+                              child: Text('metros'),
+                            ),
+                          ),
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                            AlturaInputFormatter()
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                children: <Widget>[
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.5,
+                    child: Padding(
+                      //form Estomago
+                      padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+                      child: Form(
+                        key: _estomagoKey,
+                        child: TextFormField(
+                          controller: _estomagoController,
+                          style: const TextStyle(fontSize: 16),
+                          decoration: const InputDecoration(
+                              filled: true,
+                              fillColor: Colors.white,
+                              border: OutlineInputBorder(),
+                              labelText: "Estômago",
+                              prefixIcon: Icon(Icons.compare_arrows_rounded),
+                              suffix: Padding(
+                                padding: EdgeInsets.fromLTRB(0, 0, 10, 0),
+                                child: Text('cm'),
+                              )),
+                          keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.5,
+                    child: Padding(
+                      //form Cintura
+                      padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+                      child: Form(
+                        key: _cinturaKey,
+                        child: TextFormField(
+                          controller: _cinturaController,
+                          style: const TextStyle(fontSize: 16),
+                          decoration: const InputDecoration(
+                              filled: true,
+                              fillColor: Colors.white,
+                              border: OutlineInputBorder(),
+                              labelText: "Cintura",
+                              prefixIcon: Icon(Icons.swap_horiz_rounded),
+                              suffix: Padding(
+                                padding: EdgeInsets.fromLTRB(0, 0, 10, 0),
+                                child: Text('cm'),
+                              )),
+                          keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              Row(
+                children: <Widget>[
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.5,
+                    child: Padding(
+                      //form Quadril
+                      padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+                      child: Form(
+                        key: _quadrilKey,
+                        child: TextFormField(
+                          controller: _quadrilController,
+                          style: const TextStyle(fontSize: 16),
+                          decoration: const InputDecoration(
+                              filled: true,
+                              fillColor: Colors.white,
+                              border: OutlineInputBorder(),
+                              labelText: "Quadril",
+                              prefixIcon: Icon(Icons.compare_arrows_rounded),
+                              suffix: Padding(
+                                padding: EdgeInsets.fromLTRB(0, 0, 10, 0),
+                                child: Text('cm'),
+                              )),
+                          keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.5,
+                    child: Padding(
+                      //form Umbigo
+                      padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+                      child: Form(
+                        key: _umbigoKey,
+                        child: TextFormField(
+                          controller: _umbigoController,
+                          style: const TextStyle(fontSize: 16),
+                          decoration: const InputDecoration(
+                              filled: true,
+                              fillColor: Colors.white,
+                              border: OutlineInputBorder(),
+                              labelText: "Umbigo",
+                              prefixIcon: Icon(Icons.swap_horiz_rounded),
+                              suffix: Padding(
+                                padding: EdgeInsets.fromLTRB(0, 0, 10, 0),
+                                child: Text('cm'),
+                              )),
+                          keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              Padding(
+                //form Queixa Principal
+                padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+                child: Container(
+                  height: 120,
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(width: 0.5),
+                      borderRadius: BorderRadius.circular(7)),
                   child: Form(
-                    key: _dataKey,
+                    key: _queixaKey,
                     child: TextFormField(
-                      controller: _dataController,
+                      maxLines: null,
+                      controller: _queixaController,
                       style: const TextStyle(fontSize: 16),
                       decoration: const InputDecoration(
                         filled: true,
                         fillColor: Colors.white,
-                        border: OutlineInputBorder(),
-                        labelText: "Data da Consulta",
-                        prefixIcon: Icon(Icons.date_range_outlined),
+                        border: InputBorder.none,
+                        labelText: "Queixa Principal",
+                        prefixIcon: Icon(Icons.mood_bad),
                       ),
-                      keyboardType: TextInputType.number,
+                      keyboardType: TextInputType.multiline,
                       validator: (value) {
-                        if (value!.isEmpty || value.length != 10) {
-                          return "Data inválida!";
+                        if (value!.isEmpty) {
+                          return "Campo Obrigatório!";
                         } else {
                           return null;
                         }
                       },
-                      inputFormatters: [
-                        FilteringTextInputFormatter.digitsOnly,
-                        DataInputFormatter(),
-                      ],
                     ),
                   ),
                 ),
-                Row(
-                  children: <Widget>[
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.5,
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
-                        child: Form(
-                          key: _valorKey,
-                          child: TextFormField(
-                            controller: _valorController,
-                            style: const TextStyle(fontSize: 16),
-                            decoration: const InputDecoration(
-                              filled: true,
-                              fillColor: Colors.white,
-                              border: OutlineInputBorder(),
-                              labelText: "Valor",
-                              prefixIcon: Icon(Icons.attach_money),
-                              prefix: Padding(
-                                padding: EdgeInsets.fromLTRB(0, 0, 10, 0),
-                                child: Text("R\$:"),
+              ),
+              Padding(
+                //form Alimentacao
+                padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+                child: Container(
+                  height: 120,
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(width: 0.5),
+                      borderRadius: BorderRadius.circular(7)),
+                  child: Form(
+                    key: _alimentacaoKey,
+                    child: TextFormField(
+                      maxLines: null,
+                      controller: _alimentacaoController,
+                      style: const TextStyle(fontSize: 16),
+                      decoration: const InputDecoration(
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: InputBorder.none,
+                        labelText: "Alimentação",
+                        prefixIcon: Icon(Icons.restaurant_menu_rounded),
+                      ),
+                      keyboardType: TextInputType.multiline,
+                    ),
+                  ),
+                ),
+              ),
+              Padding(
+                //form Plano de Tratamento
+                padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+                child: Container(
+                  height: 120,
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(width: 0.5),
+                      borderRadius: BorderRadius.circular(7)),
+                  child: Form(
+                    key: _tratamentoKey,
+                    child: TextFormField(
+                      maxLines: null,
+                      controller: _tratamentoController,
+                      style: const TextStyle(fontSize: 16),
+                      decoration: const InputDecoration(
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: InputBorder.none,
+                        labelText: "Plano de Tratamento",
+                        prefixIcon: Icon(Icons.my_library_books_outlined),
+                      ),
+                      keyboardType: TextInputType.multiline,
+                    ),
+                  ),
+                ),
+              ),
+              Padding(
+                //form Observações
+                padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+                child: Container(
+                  height: 120,
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border.all(width: 0.5),
+                      borderRadius: BorderRadius.circular(7)),
+                  child: Form(
+                    key: _observacoesKey,
+                    child: TextFormField(
+                      maxLines: null,
+                      controller: _observacoesController,
+                      style: const TextStyle(fontSize: 16),
+                      decoration: const InputDecoration(
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: InputBorder.none,
+                        labelText: "Informações Adicionais",
+                        prefixIcon: Icon(Icons.info_outline),
+                      ),
+                      keyboardType: TextInputType.multiline,
+                    ),
+                  ),
+                ),
+              ),
+              Row(
+                //Form Exercicio Físico
+                children: <Widget>[
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+                    child: Container(
+                      padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
+                      width: MediaQuery.of(context).size.width * 0.94,
+                      height: 85,
+                      decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(width: 0.5)),
+                      child: Column(
+                        children: [
+                          const Text(
+                              "Pratica atividades físicas regularmente?",
+                              style: TextStyle(fontSize: 16)),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Form(
+                                child: Radio(
+                                    value: 1,
+                                    groupValue: _exFisico,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _exFisico = value!;
+                                      });
+                                    }),
                               ),
-                            ),
-                            keyboardType: TextInputType.number,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly,
-                              RealInputFormatter()
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.5,
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
-                        child: Form(
-                          key: _pagamentoKey,
-                          child: TextFormField(
-                            controller: _pagamentoController,
-                            style: const TextStyle(fontSize: 16),
-                            decoration: const InputDecoration(
-                              filled: true,
-                              fillColor: Colors.white,
-                              border: OutlineInputBorder(),
-                              labelText: "Pagamento",
-                              prefixIcon: Icon(Icons.payment),
-                            ),
-                            keyboardType: TextInputType.text,
-                            inputFormatters: [
-                              LengthLimitingTextInputFormatter(20)
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                Row(
-                  children: <Widget>[
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.5,
-                      child: Padding(
-                        //form Peso
-                        padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
-                        child: Form(
-                          key: _pesoKey,
-                          child: TextFormField(
-                            controller: _pesoController,
-                            style: const TextStyle(fontSize: 16),
-                            decoration: const InputDecoration(
-                              filled: true,
-                              fillColor: Colors.white,
-                              border: OutlineInputBorder(),
-                              labelText: "Peso",
-                              prefixIcon: Icon(Icons.scale),
-                              suffix: Padding(
-                                padding: EdgeInsets.fromLTRB(0, 0, 10, 0),
-                                child: Text('Kg'),
+                              const Text("Sim"),
+                              Form(
+                                child: Radio(
+                                    value: 2,
+                                    groupValue: _exFisico,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _exFisico = value!;
+                                      });
+                                    }),
                               ),
-                            ),
-                            keyboardType: TextInputType.number,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly,
-                              PesoInputFormatter()
+                              const Text("Não"),
                             ],
                           ),
-                        ),
+                        ],
                       ),
                     ),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.5,
-                      child: Padding(
-                        //form Altura
-                        padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
-                        child: Form(
-                          key: _alturaKey,
-                          child: TextFormField(
-                            controller: _alturaController,
-                            style: const TextStyle(fontSize: 16),
-                            decoration: const InputDecoration(
-                              filled: true,
-                              fillColor: Colors.white,
-                              border: OutlineInputBorder(),
-                              labelText: "Altura",
-                              prefixIcon: Icon(Icons.height),
-                              suffix: Padding(
-                                padding: EdgeInsets.fromLTRB(0, 0, 10, 0),
-                                child: Text('metros'),
-                              ),
-                            ),
-                            keyboardType: TextInputType.number,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly,
-                              AlturaInputFormatter()
-                            ],
+                  ),
+                ],
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+                child: Container(
+                  padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
+                  width: MediaQuery.of(context).size.width * 0.94,
+                  height: 85,
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(width: 0.5)),
+                  child: Column(
+                    children: [
+                      const Text("Hidratação está adequada?",
+                          style: TextStyle(fontSize: 16)),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Form(
+                            child: Radio(
+                                value: 1,
+                                groupValue: _hidratacao,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _hidratacao = value!;
+                                  });
+                                }),
                           ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                Row(
-                  children: <Widget>[
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.5,
-                      child: Padding(
-                        //form Estomago
-                        padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
-                        child: Form(
-                          key: _estomagoKey,
-                          child: TextFormField(
-                            controller: _estomagoController,
-                            style: const TextStyle(fontSize: 16),
-                            decoration: const InputDecoration(
-                                filled: true,
-                                fillColor: Colors.white,
-                                border: OutlineInputBorder(),
-                                labelText: "Estômago",
-                                prefixIcon: Icon(Icons.compare_arrows_rounded),
-                                suffix: Padding(
-                                  padding: EdgeInsets.fromLTRB(0, 0, 10, 0),
-                                  child: Text('cm'),
-                                )),
-                            keyboardType: const TextInputType.numberWithOptions(
-                                decimal: true),
+                          const Text("Sim"),
+                          Form(
+                            child: Radio(
+                                value: 2,
+                                groupValue: _hidratacao,
+                                onChanged: (value) {
+                                  setState(() {
+                                    _hidratacao = value!;
+                                  });
+                                }),
                           ),
-                        ),
+                          const Text("Não"),
+                        ],
                       ),
-                    ),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.5,
-                      child: Padding(
-                        //form Cintura
-                        padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
-                        child: Form(
-                          key: _cinturaKey,
-                          child: TextFormField(
-                            controller: _cinturaController,
-                            style: const TextStyle(fontSize: 16),
-                            decoration: const InputDecoration(
-                                filled: true,
-                                fillColor: Colors.white,
-                                border: OutlineInputBorder(),
-                                labelText: "Cintura",
-                                prefixIcon: Icon(Icons.swap_horiz_rounded),
-                                suffix: Padding(
-                                  padding: EdgeInsets.fromLTRB(0, 0, 10, 0),
-                                  child: Text('cm'),
-                                )),
-                            keyboardType: const TextInputType.numberWithOptions(
-                                decimal: true),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                Row(
-                  children: <Widget>[
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.5,
-                      child: Padding(
-                        //form Quadril
-                        padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
-                        child: Form(
-                          key: _quadrilKey,
-                          child: TextFormField(
-                            controller: _quadrilController,
-                            style: const TextStyle(fontSize: 16),
-                            decoration: const InputDecoration(
-                                filled: true,
-                                fillColor: Colors.white,
-                                border: OutlineInputBorder(),
-                                labelText: "Quadril",
-                                prefixIcon: Icon(Icons.compare_arrows_rounded),
-                                suffix: Padding(
-                                  padding: EdgeInsets.fromLTRB(0, 0, 10, 0),
-                                  child: Text('cm'),
-                                )),
-                            keyboardType: const TextInputType.numberWithOptions(
-                                decimal: true),
-                          ),
-                        ),
-                      ),
-                    ),
-                    SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.5,
-                      child: Padding(
-                        //form Umbigo
-                        padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
-                        child: Form(
-                          key: _umbigoKey,
-                          child: TextFormField(
-                            controller: _umbigoController,
-                            style: const TextStyle(fontSize: 16),
-                            decoration: const InputDecoration(
-                                filled: true,
-                                fillColor: Colors.white,
-                                border: OutlineInputBorder(),
-                                labelText: "Umbigo",
-                                prefixIcon: Icon(Icons.swap_horiz_rounded),
-                                suffix: Padding(
-                                  padding: EdgeInsets.fromLTRB(0, 0, 10, 0),
-                                  child: Text('cm'),
-                                )),
-                            keyboardType: const TextInputType.numberWithOptions(
-                                decimal: true),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                Padding(
-                  //form Queixa Principal
-                  padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
-                  child: Container(
-                    height: 120,
-                    decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border.all(width: 0.5),
-                        borderRadius: BorderRadius.circular(7)),
-                    child: Form(
-                      key: _queixaKey,
-                      child: TextFormField(
-                        maxLines: null,
-                        controller: _queixaController,
-                        style: const TextStyle(fontSize: 16),
-                        decoration: const InputDecoration(
-                          filled: true,
-                          fillColor: Colors.white,
-                          border: InputBorder.none,
-                          labelText: "Queixa Principal",
-                          prefixIcon: Icon(Icons.mood_bad),
-                        ),
-                        keyboardType: TextInputType.multiline,
-                        validator: (value) {
-                          if (value!.isEmpty) {
-                            return "Campo Obrigatório!";
-                          } else {
-                            return null;
-                          }
-                        },
-                      ),
-                    ),
+                    ],
                   ),
                 ),
-                Padding(
-                  //form Alimentacao
-                  padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
-                  child: Container(
-                    height: 120,
-                    decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border.all(width: 0.5),
-                        borderRadius: BorderRadius.circular(7)),
-                    child: Form(
-                      key: _alimentacaoKey,
-                      child: TextFormField(
-                        maxLines: null,
-                        controller: _alimentacaoController,
-                        style: const TextStyle(fontSize: 16),
-                        decoration: const InputDecoration(
-                          filled: true,
-                          fillColor: Colors.white,
-                          border: InputBorder.none,
-                          labelText: "Alimentação",
-                          prefixIcon: Icon(Icons.restaurant_menu_rounded),
-                        ),
-                        keyboardType: TextInputType.multiline,
+              ),
+              Container(
+                //Botão de salvar
+                margin: const EdgeInsets.fromLTRB(70, 0, 70, 2),
+                child: OutlinedButton(
+                  style: const ButtonStyle(
+                      backgroundColor:
+                          MaterialStatePropertyAll(Colors.white)),
+                  onPressed: save,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Container(
+                        margin: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                        child: const Icon(Icons.search),
                       ),
-                    ),
+                      const Text("Salvar"),
+                    ],
                   ),
                 ),
-                Padding(
-                  //form Plano de Tratamento
-                  padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
-                  child: Container(
-                    height: 120,
-                    decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border.all(width: 0.5),
-                        borderRadius: BorderRadius.circular(7)),
-                    child: Form(
-                      key: _tratamentoKey,
-                      child: TextFormField(
-                        maxLines: null,
-                        controller: _tratamentoController,
-                        style: const TextStyle(fontSize: 16),
-                        decoration: const InputDecoration(
-                          filled: true,
-                          fillColor: Colors.white,
-                          border: InputBorder.none,
-                          labelText: "Plano de Tratamento",
-                          prefixIcon: Icon(Icons.my_library_books_outlined),
-                        ),
-                        keyboardType: TextInputType.multiline,
+              ),
+              Container(
+                //Botão de salvar
+                margin: const EdgeInsets.fromLTRB(70, 0, 70, 5),
+                child: OutlinedButton(
+                  style: const ButtonStyle(
+                      backgroundColor:
+                          MaterialStatePropertyAll(Colors.white)),
+                  onPressed: () {
+                    buscarDaGaleria();
+                    //Navigator.popAndPushNamed(context, "/imagens");
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Container(
+                        margin: const EdgeInsets.fromLTRB(10, 0, 10, 0),
+                        child: const Icon(Icons.image_search_rounded),
                       ),
-                    ),
+                      const Text("Anexar imagens"),
+                    ],
                   ),
                 ),
-                Padding(
-                  //form Observações
-                  padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
-                  child: Container(
-                    height: 120,
-                    decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border.all(width: 0.5),
-                        borderRadius: BorderRadius.circular(7)),
-                    child: Form(
-                      key: _observacoesKey,
-                      child: TextFormField(
-                        maxLines: null,
-                        controller: _observacoesController,
-                        style: const TextStyle(fontSize: 16),
-                        decoration: const InputDecoration(
-                          filled: true,
-                          fillColor: Colors.white,
-                          border: InputBorder.none,
-                          labelText: "Informações Adicionais",
-                          prefixIcon: Icon(Icons.info_outline),
-                        ),
-                        keyboardType: TextInputType.multiline,
-                      ),
-                    ),
-                  ),
-                ),
-                Row(
-                  //Form Exercicio Físico
-                  children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
-                      child: Container(
-                        padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
-                        width: MediaQuery.of(context).size.width * 0.94,
-                        height: 85,
-                        decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(6),
-                            border: Border.all(width: 0.5)),
-                        child: Column(
-                          children: [
-                            const Text(
-                                "Pratica atividades físicas regularmente?",
-                                style: TextStyle(fontSize: 16)),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Form(
-                                  child: Radio(
-                                      value: 1,
-                                      groupValue: _exFisico,
-                                      onChanged: (value) {
-                                        setState(() {
-                                          _exFisico = value!;
-                                        });
-                                      }),
-                                ),
-                                const Text("Sim"),
-                                Form(
-                                  child: Radio(
-                                      value: 2,
-                                      groupValue: _exFisico,
-                                      onChanged: (value) {
-                                        setState(() {
-                                          _exFisico = value!;
-                                        });
-                                      }),
-                                ),
-                                const Text("Não"),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
-                  child: Container(
-                    padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
-                    width: MediaQuery.of(context).size.width * 0.94,
-                    height: 85,
-                    decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(width: 0.5)),
-                    child: Column(
-                      children: [
-                        const Text("Hidratação está adequada?",
-                            style: TextStyle(fontSize: 16)),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Form(
-                              child: Radio(
-                                  value: 1,
-                                  groupValue: _hidratacao,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      _hidratacao = value!;
-                                    });
-                                  }),
-                            ),
-                            const Text("Sim"),
-                            Form(
-                              child: Radio(
-                                  value: 2,
-                                  groupValue: _hidratacao,
-                                  onChanged: (value) {
-                                    setState(() {
-                                      _hidratacao = value!;
-                                    });
-                                  }),
-                            ),
-                            const Text("Não"),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Container(
-                  //Botão de salvar
-                  margin: const EdgeInsets.fromLTRB(70, 0, 70, 2),
-                  child: OutlinedButton(
-                    style: const ButtonStyle(
-                        backgroundColor:
-                            MaterialStatePropertyAll(Colors.white)),
-                    onPressed: save,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Container(
-                          margin: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-                          child: const Icon(Icons.search),
-                        ),
-                        const Text("Salvar"),
-                      ],
-                    ),
-                  ),
-                ),
-                Container(
-                  //Botão de salvar
-                  margin: const EdgeInsets.fromLTRB(70, 0, 70, 5),
-                  child: OutlinedButton(
-                    style: const ButtonStyle(
-                        backgroundColor:
-                            MaterialStatePropertyAll(Colors.white)),
-                    onPressed: () {
-                      buscarDaGaleria();
-                      //Navigator.popAndPushNamed(context, "/imagens");
-                    },
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Container(
-                          margin: const EdgeInsets.fromLTRB(10, 0, 10, 0),
-                          child: const Icon(Icons.image_search_rounded),
-                        ),
-                        const Text("Anexar imagens"),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

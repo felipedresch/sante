@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:sante/cadastro.dart';
 import 'package:sante/cadastroView.dart';
 import 'package:sante/consulta.dart';
+import 'package:sante/fullscreen.dart';
 import 'package:sante/repositories/cliente_repository.dart';
 import 'package:sante/repositories/sessao_repository.dart';
 import 'package:sante/repositories/track_screens.dart';
