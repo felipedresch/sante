@@ -8,7 +8,7 @@ Este projeto aconteceu, primeiramente, como uma maneira de estudar o desenvolvim
 - Cadastrar clientes, preenchendo campos básicos (Nome, telefone, data de nascimento, alergias, ...)
 - Cadastrar consultas para cada cliente. Possui informações que geralemnte a cada nova sessão (Peso, medidas, alimentação, ...)
 - Anexar fotos junto ao cadastro de cada nova consulta, permitindo um acompanhamento bem feito do progresso do paciente
-- Lembretes de aniversário: Verifica quais clientes fazem aniversário no período informado
+- Lembretes de aniversário: Verifica quais clientes fazem aniversário no período informado (em desenvolvimento)
 
 
 ## Preview
