@@ -12,9 +12,6 @@ Este projeto aconteceu, primeiramente, como uma maneira de estudar o desenvolvim
 
 
 ## Preview
-### Tela inicial:
-
-<img src="https://github.com/felipedresch/sante/assets/61145576/33a185d7-ff48-446a-b812-5e1203a42ab2"  width="250" height="600">
 
 ### Lista de Clientes:
 
